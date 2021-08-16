@@ -7,6 +7,7 @@
 
 [Action](https://github.com/DinaSami/todo-app/actions)
 
-[deploy]()
+[deploy](https://naughty-jennings-880a90.netlify.app/)
+
 ## UML
 ![preview](./UML.png)
