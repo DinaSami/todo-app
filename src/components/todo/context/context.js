@@ -1,15 +1,25 @@
-// import React, { useState } from 'react';
+import React from 'react'
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
-// export const SettingsContext = React.createContext();
+function Pagination(props) {
+    // listPerPage,totalCards
+    const cardsNum = [];
+    for (let index = 1; index <= Math.ceil(props.totalCards/props.listPerPage); index++) {
+        cardsNum.push(index)
+    }
 
-// export default function SettingsProvider(props) {
-//   const [hide, setHide] = useState(false);
-//   const [itemNumber, setItemNumber] = useState(3);
-//   const [sort, setSort] = useState(''); // create default sort here! Pass in 'difficulty' instead of a blank string, for example
+    return (
+        <nav>     
+            <ul className="pagination pagination-lg">
+           
+                {cardsNum.map(number => (
+                    <li className="page-item " key={number} >
+                        <a href="!#" className='page-link' onClick={() => props.paginate(number)}>{number}</a>
+                    </li>
+                ))}
+            </ul>
+        </nav>
+    )
+}
 
-//   return (
-//     <SettingsContext.Provider value={{ hide, itemNumber, sort, setItemNumber, setHide }}>
-//       {props.children}
-//     </SettingsContext.Provider>
-//   )
-// }
+export default Pagination

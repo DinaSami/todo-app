@@ -15,7 +15,7 @@ function List(props) {
                   <p><small>Assigned to: {item.assignee}</small></p>
                   <p><small>Difficulty: {item.difficulty}</small></p>
                   <div onClick={() => props.toggleComplete(idx)}>Complete: {item.complete.toString()}</div>
-                  <button onClick={() => props.deleteItem(idx)} className='danger'>X</button>
+                  <button id='btn' onClick={() => props.deleteItem(idx)} className='danger'>X</button>
               </Card>
             </div>
             ))
