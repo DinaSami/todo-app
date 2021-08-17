@@ -74,11 +74,15 @@ function App() {
         toggleComplete={toggleComplete}
         deleteItem={deleteItem}
       />
+      <br></br>
       <Pagination
         listPerPage={listPerPage}
         totalCards={list.length}
         paginate={paginate}
       />
+      <br></br>
+      <br></br>
+
     </div>
   )
 }
