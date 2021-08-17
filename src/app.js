@@ -1,13 +1,11 @@
+import React, { useState, useEffect } from 'react';
+// import SettingContextProvider from './components/todo/context/context';
 // import FormBlue from './components/todo/FormBlue.js';
 import ToDo from './components/todo/todo.js';
-import List from './components/todo/List';
-// import SettingsProvider from './components/todo/context/context';
+import Pagination from './components/todo/context/context'
 import useForm from '../src/hooks/form.js';
 import { v4 as uuid } from 'uuid';
-import React, { useState, useEffect } from 'react';
-export const ThemeContext = React.createContext();
-
-
+// import ListContextProvider from './components/todo/context/context';
 
 
 function App() {
@@ -15,10 +13,9 @@ function App() {
   const [list, setList] = useState([]);
   const [incomplete, setIncomplete] = useState([]);
   const { handleChange, handleSubmit } = useForm(addItem);
-  // const [Display , setDisplay ] = useState(false);
-  // const [NumberOfItems , setNumberOfItems] = useState(0)
-  // const [DefaultSort  , setDefaultSort] = useState('')
- 
+  const [currentPage, setCurrentPage] = useState(1)
+  const [listPerPage] = useState(3)
+
 
   function addItem(item) {
     console.log(item);
@@ -56,22 +53,32 @@ function App() {
     document.title = `To Do List: ${incomplete}`;
   }, [incomplete, list]);
 
+
+  // get current cards
+  const indexOfLastCard = currentPage * listPerPage;
+  const indexOfFirstCard = indexOfLastCard - listPerPage;
+  const currentCard = list.slice(indexOfFirstCard, indexOfLastCard);
+
+  // Change page
+  const paginate = pageNumber => setCurrentPage(pageNumber);
+
+
   return (
     <div>
-       {/* <SettingsProvider> */}
-       <ToDo
+      <ToDo
         incomplete={incomplete}
         handleChange={handleChange}
         handleSubmit={handleSubmit}
-      />
-         {/* </SettingsProvider> */}
-      <List
-        list={list}
+
+        list={currentCard}
         toggleComplete={toggleComplete}
         deleteItem={deleteItem}
       />
-    
- 
+      <Pagination
+        listPerPage={listPerPage}
+        totalCards={list.length}
+        paginate={paginate}
+      />
     </div>
   )
 }
