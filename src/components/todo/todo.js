@@ -1,50 +1,158 @@
 
-import React from 'react';
-import { FormGroup, InputGroup, Elevation, Button, Card} from "@blueprintjs/core";
-import "normalize.css";
-import "@blueprintjs/core/lib/css/blueprint.css";
-import "@blueprintjs/icons/lib/css/blueprint-icons.css";
-import './todo.css';
-import List from '../todo/List'
+import React, { useEffect, useState, useContext } from 'react';
+import useForm from '../../hooks/form';
+import { Button } from "@blueprintjs/core";
+import { v4 as uuid } from 'uuid';
+import { hhhh } from '../context/Settings'
+import Header from '../Header';
+import List from '../List';
+import Form from '../Form';
+import './todo.css'
+
 
 const ToDo = (props) => {
+
+  const settings = useContext(hhhh);
+  const [list, setList] = useState([]);
+  const [incomplete, setIncomplete] = useState([]);
+  const [startIndex, setStartIndex] = useState(0);
+  const [endIndex, setEndIndex] = useState(settings.itemNumber);
+  const { handleChange, handleSubmit } = useForm(addItem);
+  // const [defaultRange, setdefaultRange] = useState(settings.itemNumber);
+
+  // const storage;
+
+  function addItem(item) {
+
+    const data = {
+      id: uuid(),
+      text: item.text,
+      assignee: item.assignee,
+      difficulty: item.difficulty,
+      complete: false,
+    };
+    setList([...list, data]);
+  }
+
+
+  function deleteItem(id) {
+    let items = []
+    // eslint-disable-next-line array-callback-return
+    list.map((ele, idx) => {
+      if (id === idx) {
+        return 0
+      } else {
+        items.push(ele)
+      }
+    })
+    setList(items);
+  }
+
+  function toggleComplete(id) {
+    const items = list.map((item, idx) => {
+      if (idx === id) {
+        item.complete = !item.complete;
+      }
+      return item;
+    });
+    setList(items);
+  }
+
+  useEffect(() => {
+    let incompleteCount = list.filter(item => !item.complete).length;
+    setIncomplete(incompleteCount);
+    document.title = `To Do List: ${incomplete}`;
+  }, [list]);
+
+  useEffect(() => {
+    addItem({
+      text: 'Sample item',
+      assignee: 'Test person',
+      difficulty: 3,
+    });
+
+  }, []);
+  useEffect(() => {
+    const newStorage = localStorage.getItem('newStorage')
+    if (newStorage) {
+      // setdefaultRange((Number(newStorage)));
+      settings.setItemNumber(Number(newStorage));
+    }
+  }, [])
+
+
+  useEffect(() => {
+    localStorage.setItem('setting', (Number(settings.itemNumber)));
+
+    setStartIndex(0);
+    setEndIndex(settings.itemNumber);
+    const storage = localStorage.getItem('setting');
+    localStorage.setItem('newStorage', storage);
+  }, [settings.itemNumber]);
+
+
+  // === === hide completed todo's === === //
+  function handleHide() {
+    settings.setHide(!settings.hide);
+  }
+
+
+  // === === pagination change === === //
+  function handlePaginationChange(e) {
+    settings.setItemNumber(e.target.value);
+  }
+
+
+  // === === pagination === === //
+  function pagination() {
+    let result = list.slice(startIndex, endIndex);
+    return result;
+  }
+
+  // === === next === === //
+  function next() {
+    setStartIndex(startIndex + settings.itemNumber - 1);
+    setEndIndex(endIndex + settings.itemNumber);
+  }
+
+  // === === previous === === //
+  function previous() {
+    setStartIndex(startIndex - settings.itemNumber);
+    setEndIndex(endIndex - settings.itemNumber);
+  }
+
+
   return (
     <>
-      <div className="app">
+      <Header
+        incomplete={incomplete}
+      />
+      <Form
+        handleSubmit={handleSubmit}
+        handleChange={handleChange}
+        // defaultRange={defaultRange}
+        handlePaginationChange={handlePaginationChange}
+        handleHide={handleHide}
+      />
+      <br></br>
+      {
+        pagination().map((item, idx) => {
 
-        <Card interactive={true} elevation={Elevation.TWO}>
-          <header>
-            <h1>To Do List: {props.incomplete} items pending</h1>
-          </header>
+          if (settings.hide === false || item.complete === false) {
+            return (
+              <List
+                item={item}
+                idx={idx}
+                toggleComplete={toggleComplete}
+                deleteItem={deleteItem}
+              />
+            )
+          }
+        })
+      }
+      <Button intent="success" onClick={previous}>Previous</Button>
+      <Button intent="success" onClick={next}>Next</Button>
 
-          <h2>Add To Do Item</h2>
-
-          <form onSubmit={props.handleSubmit} >
-            <FormGroup
-              label="To Do Item"
-            >
-              < InputGroup onChange={props.handleChange} placeholder="Item Details" name="text" type="text" intent="success" round="true"/>
-            </FormGroup >
-
-            <FormGroup
-              label="Assigned To"
-            >
-              < InputGroup onChange={props.handleChange} placeholder="Assignee Name" name="assignee" type="text" intent="warning" round="true"/>
-            </FormGroup >
-            <FormGroup
-              label="Difficulty" >
-              < InputGroup onChange={props.handleChange} defaultValue={3} type="range" min={1} max={5} name="difficulty" intent="danger" round="true"/>
-            </FormGroup >
-
-            <Button text="Add Item" className="bp3-intent-primary" type="submit"/>
-          </form>
-        </Card>
-        </div>
-<List 
-   list={props.list}
-   toggleComplete={props.toggleComplete}
-   deleteItem={props.deleteItem}
-/>
     </>
   );
 };

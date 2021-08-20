@@ -1,16 +1,16 @@
 body {
-    background: linear-gradient(to right, #19547b, #ffd89b); 
+  background: linear-gradient(to right, #19547b, #ffd89b); 
 }
-  
-  .app {
-    display: flex;
-    justify-content: center;
-    margin-top: 8%;
+
+.app {
+  display: flex;
+  justify-content: center;
+  margin-top: 8%;
 }
-  .card{
-      margin: .3rem;
+.card{
+    margin: .3rem;
 }
-  .span1{
+.span1{
 background-color: rgb(35, 161, 41);
 border-radius: 20px;
 padding: 0.5rem;
@@ -18,10 +18,10 @@ width: 116px;
 text-align: center;
 }
 .span2{
-    background-color:red;
-    border-radius: 20px;
-    padding: 0.5rem;
-    width: 116px;
+  background-color:red;
+  border-radius: 20px;
+  padding: 0.5rem;
+  width: 116px;
 text-align: center;
 
 }
