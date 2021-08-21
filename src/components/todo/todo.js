@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState, useContext } from 'react';
 import useForm from '../../hooks/form';
+import { AuthContext } from '../context/auth';
 import { Button } from "@blueprintjs/core";
 import { v4 as uuid } from 'uuid';
 import { hhhh } from '../context/Settings'
@@ -13,6 +14,7 @@ import './todo.css'
 const ToDo = (props) => {
 
   const settings = useContext(hhhh);
+  const { loggedIn, user } = useContext(AuthContext);
   const [list, setList] = useState([]);
   const [incomplete, setIncomplete] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
@@ -32,34 +34,42 @@ const ToDo = (props) => {
     };
     localStorage.setItem('item', JSON.stringify([...list, data]));
     setList(JSON.parse(localStorage.getItem('item')));
-    window.location.reload();
   }
 
 
   function deleteItem(id) {
-    let items = []
-    // eslint-disable-next-line array-callback-return
-    list.map((ele, idx) => {
-      if (id === idx) {
-        return 0
-      } else {
-        items.push(ele)
-      }
-    })
-    console.log(list);
-    localStorage.setItem('item',JSON.stringify(items))
-    setList(JSON.parse(localStorage.getItem('item')))
+    if (loggedIn && user.capabilities.includes('delete')) {
+      let items = []
+      // eslint-disable-next-line array-callback-return
+      list.map((ele, idx) => {
+        if (id === idx) {
+          return 0
+        } else {
+          items.push(ele)
+        }
+      })
+      console.log(list);
+      localStorage.setItem('item',JSON.stringify(items))
+      setList(JSON.parse(localStorage.getItem('item')))
+    }else{
+      window.alert('user can not delete item!');
+    }
   }
 
   function toggleComplete(id) {
-    const items = list.map((item, idx) => {
-      if (idx === id) {
-        item.complete = !item.complete;
-      }
-      return item;
-    });
-    setList(items);
-    localStorage.setItem('item', JSON.stringify(list))
+    if (loggedIn && user.capabilities.includes('update')) {
+
+      const items = list.map((item, idx) => {
+        if (idx === id) {
+          item.complete = !item.complete;
+        }
+        return item;
+      });
+      setList(items);
+      localStorage.setItem('item', JSON.stringify(list))
+    }else{
+      window.alert('user can not update item!');
+    }
   }
 
   useEffect(() => {
