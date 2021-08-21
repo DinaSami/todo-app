@@ -19,11 +19,10 @@ const ToDo = (props) => {
   const [endIndex, setEndIndex] = useState(settings.itemNumber);
   const { handleChange, handleSubmit } = useForm(addItem);
   // const [defaultRange, setdefaultRange] = useState(settings.itemNumber);
-
+  
   // const storage;
-
+  
   function addItem(item) {
-
     const data = {
       id: uuid(),
       text: item.text,
@@ -31,7 +30,9 @@ const ToDo = (props) => {
       difficulty: item.difficulty,
       complete: false,
     };
-    setList([...list, data]);
+    localStorage.setItem('item', JSON.stringify([...list, data]));
+    setList(JSON.parse(localStorage.getItem('item')));
+    window.location.reload();
   }
 
 
@@ -45,7 +46,9 @@ const ToDo = (props) => {
         items.push(ele)
       }
     })
-    setList(items);
+    console.log(list);
+    localStorage.setItem('item',JSON.stringify(items))
+    setList(JSON.parse(localStorage.getItem('item')))
   }
 
   function toggleComplete(id) {
@@ -56,6 +59,7 @@ const ToDo = (props) => {
       return item;
     });
     setList(items);
+    localStorage.setItem('item', JSON.stringify(list))
   }
 
   useEffect(() => {
@@ -63,16 +67,17 @@ const ToDo = (props) => {
     setIncomplete(incompleteCount);
     document.title = `To Do List: ${incomplete}`;
   }, [list]);
+  
+
+  
 
   useEffect(() => {
-    addItem({
-      text: 'Sample item',
-      assignee: 'Test person',
-      difficulty: 3,
-    });
 
-  }, []);
-  useEffect(() => {
+    const itemStorage = JSON.parse(localStorage.getItem('item'));
+    if (itemStorage) {
+      setList(itemStorage);
+    }
+
     const newStorage = localStorage.getItem('newStorage')
     if (newStorage) {
       // setdefaultRange((Number(newStorage)));
@@ -105,13 +110,14 @@ const ToDo = (props) => {
 
   // === === pagination === === //
   function pagination() {
+
     let result = list.slice(startIndex, endIndex);
     return result;
   }
 
   // === === next === === //
   function next() {
-    setStartIndex(startIndex + settings.itemNumber - 1);
+    setStartIndex(startIndex + settings.itemNumber);
     setEndIndex(endIndex + settings.itemNumber);
   }
 
@@ -119,6 +125,7 @@ const ToDo = (props) => {
   function previous() {
     setStartIndex(startIndex - settings.itemNumber);
     setEndIndex(endIndex - settings.itemNumber);
+    // window.location.reload();
   }
 
 
