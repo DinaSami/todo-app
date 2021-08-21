@@ -8,8 +8,9 @@ import { hhhh } from '../context/Settings'
 import Header from '../Header';
 import List from '../List';
 import Form from '../Form';
-import './todo.css'
-
+import './todo.css';
+import superagent from 'superagent';
+import axios from "axios";
 
 const ToDo = (props) => {
 
@@ -21,10 +22,10 @@ const ToDo = (props) => {
   const [endIndex, setEndIndex] = useState(settings.itemNumber);
   const { handleChange, handleSubmit } = useForm(addItem);
   // const [defaultRange, setdefaultRange] = useState(settings.itemNumber);
-  
+  const API = 'https://api-js401.herokuapp.com/api/v1/todo';
   // const storage;
-  
-  function addItem(item) {
+
+  async function addItem(item) {
     const data = {
       id: uuid(),
       text: item.text,
@@ -32,42 +33,57 @@ const ToDo = (props) => {
       difficulty: item.difficulty,
       complete: false,
     };
-    localStorage.setItem('item', JSON.stringify([...list, data]));
-    setList(JSON.parse(localStorage.getItem('item')));
+    // localStorage.setItem('item', JSON.stringify([...list, data]));
+    // setList(JSON.parse(localStorage.getItem('item')));
+    try {
+      await superagent.post(`${API}`).send(data)
+
+      const getResponse = await superagent.get(`${API}`);
+      setList(JSON.parse(getResponse.text).results);
+    } catch (error) {
+      console.error()
+    }
   }
 
 
-  function deleteItem(id) {
+  async function deleteItem(id) {
     if (loggedIn && user.capabilities.includes('delete')) {
-      let items = []
-      // eslint-disable-next-line array-callback-return
-      list.map((ele, idx) => {
-        if (id === idx) {
-          return 0
-        } else {
-          items.push(ele)
+      list.map(async e => {
+        if (e._id === id) {
+          await axios.delete(`${API}/${id}`);
+          const data = await axios.get(`${API}`);
+          setList(data.data.results);
+
         }
       })
-      console.log(list);
-      localStorage.setItem('item',JSON.stringify(items))
-      setList(JSON.parse(localStorage.getItem('item')))
-    }else{
+
+      // localStorage.setItem('item', JSON.stringify(items))
+      // setList(JSON.parse(localStorage.getItem('item')))
+    } else {
       window.alert('user can not delete item!');
     }
   }
 
-  function toggleComplete(id) {
+  async function toggleComplete(id) {
     if (loggedIn && user.capabilities.includes('update')) {
 
-      const items = list.map((item, idx) => {
-        if (idx === id) {
-          item.complete = !item.complete;
-        }
-        return item;
-      });
-      setList(items);
-      localStorage.setItem('item', JSON.stringify(list))
-    }else{
+      try {
+        list.map(async e => {
+          if (e._id === id) {
+            let data = {
+              'complete': !e.complete
+            }
+            await axios.put(`${API}/${id}`, data);
+            const data1 = await axios.get(`${API}`);
+            setList(data1.data.results)
+          }
+
+        })
+      } catch (error) {
+        console.error();
+      }
+      // localStorage.setItem('item', JSON.stringify(list))
+    } else {
       window.alert('user can not update item!');
     }
   }
@@ -77,9 +93,9 @@ const ToDo = (props) => {
     setIncomplete(incompleteCount);
     document.title = `To Do List: ${incomplete}`;
   }, [list]);
-  
 
-  
+
+
 
   useEffect(() => {
 
@@ -87,6 +103,17 @@ const ToDo = (props) => {
     if (itemStorage) {
       setList(itemStorage);
     }
+
+    (async () => {
+      try {
+
+        const getResponse = await superagent.get(`${API}`);
+        setList(JSON.parse(getResponse.text).results);
+      }
+      catch (error) {
+        console.error()
+      }
+    })()
 
     const newStorage = localStorage.getItem('newStorage')
     if (newStorage) {
@@ -105,6 +132,20 @@ const ToDo = (props) => {
     localStorage.setItem('newStorage', storage);
   }, [settings.itemNumber]);
 
+  useEffect(() => {
+   
+    (async () => {
+      try {
+
+        const getResponse = await axios.get(`${API}`);
+        setList(getResponse.data.results);
+      }
+      catch (error) {
+        console.error()
+      }
+    })()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
 
   // === === hide completed todo's === === //
   function handleHide() {
